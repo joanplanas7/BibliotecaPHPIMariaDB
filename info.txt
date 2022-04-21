@@ -1,3 +1,5 @@
 Web creada amb php i mariadb com a base de dades, la pagina te un login i un crud per gestionar els productes a l'apartat de administració. També utilitzem bootstrap.
 
 Video YT: https://www.youtube.com/watch?v=IZHBMwGIAoI&list=PLe6qgN7bhlHeWDFJACNH8NVXhFyNupoMP&index=10&t=32s
+
+Estic al 24
