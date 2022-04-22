@@ -1,6 +1,15 @@
 <?php 
+    session_start();
     if($_POST){
-        header('Location: inici.php');
+        if($_POST['usuari'] == "joan" && $_POST['contrassenya'] == "1234"){
+            $_SESSION['usuari'] = "ok";
+            $_SESSION['nomUsuari'] = "joan";
+            header('Location: inici.php');
+        }else{
+            $missatje= "Dades incorrectes";
+        }
+
+        
     }
 ?>
 
@@ -26,6 +35,12 @@
                             Login
                         </div>
                         <div class="card-body">
+                            <?php if(isset($missatje)){ ?>
+                                <div class="alert alert-danger" role="alert">
+                                    <?php echo $missatje ?>
+                                </div>
+                            <?php  }?>
+
                             <form method="POST"> 
                                 <div class = "form-group">
                                     <label>Usuari</label>

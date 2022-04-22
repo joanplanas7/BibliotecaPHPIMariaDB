@@ -1,7 +1,7 @@
 <?php include("template/capçelera.php"); ?>
 
 
-            <div class="jumbotron">
+            <div class="jumbotron text-center">
                 <h1 class="display-3">Pàgina de la biblioteca</h1>
                 <p class="lead">En aquesta àgina podras trobar els diferents llibres que tenim disponibles</p>
                 <hr class="my-2">

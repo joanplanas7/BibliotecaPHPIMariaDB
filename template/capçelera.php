@@ -25,6 +25,9 @@
             <li class="menuGrande nav-item">
                 <a class="nav-link" href="nosaltres.php">Nosaltres</a>
             </li>
+            <li class="menuGrande nav-item">
+                <a class="nav-link" href="administrador/index.php">Administrador</a>
+            </li>
         </ul>
     </nav>
 

@@ -15,8 +15,19 @@ switch ($accion) {
     case 'afegir':
         $sentenciaSQL = $conexio->prepare("INSERT INTO llibres(nom, imatge) VALUES (:nom, :img);");
         $sentenciaSQL->bindParam(':nom', $txtNom);
-        $sentenciaSQL->bindParam(':img', $txtImg);
+
+        $data = new DateTime();
+        $nomArxiu = ($txtImg!="")?$data->getTimestamp()."_".$txtImg: "imagen.jpg";
+
+        $tmpImg = $_FILES['txtImatge']['tmp_name'];
+        
+        if ($tmpImg!=""){
+            move_uploaded_file($tmpImg, "../../img/".$nomArxiu);
+        }
+
+        $sentenciaSQL->bindParam(':img', $nomArxiu);
         $sentenciaSQL->execute();
+        header("Location:productes.php");
         break;
     
     case 'modificar':
@@ -26,16 +37,40 @@ switch ($accion) {
         $sentenciaSQL->execute();
 
         if ($txtImg != ""){
-            $sentenciaSQL = $conexio->prepare("UPDATE llibres set imatge=:imatge WHERE id=:id");
-            $sentenciaSQL->bindParam(':imatge', $txtImg);
+
+            $data = new DateTime();
+            $nomArxiu = ($txtImg!="")?$data->getTimestamp()."_".$txtImg: "imagen.jpg";
+
+            $tmpImg = $_FILES['txtImatge']['tmp_name'];
+        
+            
+            move_uploaded_file($tmpImg, "../../img/".$nomArxiu);
+
+            $sentenciaSQL = $conexio->prepare("SELECT imatge FROM llibres WHERE id=:id");
             $sentenciaSQL->bindParam(':id', $txtID);
             $sentenciaSQL->execute();
-        }
+    
+            $imgLlibre = $sentenciaSQL->fetch(PDO::FETCH_LAZY);
+            
+            if (isset($imgLlibre["imatge"]) && ($imgLlibre["imatge"] != "imatge.jpg")){
+                if(file_exists("../../img/" . $imgLlibre["imatge"] )){
+                    
+                    unlink("../../img/" . $imgLlibre["imatge"]);
+                }
+            }
+            
+            $sentenciaSQL = $conexio->prepare("UPDATE llibres set imatge=:imatge WHERE id=:id");
+            $sentenciaSQL->bindParam(':imatge', $nomArxiu);
+            $sentenciaSQL->bindParam(':id', $txtID);
+            $sentenciaSQL->execute();
 
+            
+        }
+        header("Location:productes.php");
         break;
     
     case 'cancelar': 
-        echo "3";
+        header("Location:productes.php");
         break;
 
     case 'Seleccionar': 
@@ -50,9 +85,23 @@ switch ($accion) {
         break;
 
     case 'Eliminar': 
+        $sentenciaSQL = $conexio->prepare("SELECT imatge FROM llibres WHERE id=:id");
+        $sentenciaSQL->bindParam(':id', $txtID);
+        $sentenciaSQL->execute();
+
+        $imgLlibre = $sentenciaSQL->fetch(PDO::FETCH_LAZY);
+        
+        if (isset($imgLlibre["imatge"]) && ($imgLlibre["imatge"] != "imatge.jpg")){
+            if(file_exists("../../img/" . $imgLlibre["imatge"] )){
+                
+                unlink("../../img/" . $imgLlibre["imatge"]);
+            }
+        }
+
         $sentenciaSQL = $conexio->prepare("DELETE FROM llibres WHERE id=:id");
         $sentenciaSQL->bindParam(':id', $txtID);
         $sentenciaSQL->execute();
+        header("Location:productes.php");
         break;
     
 }
@@ -74,12 +123,13 @@ $llistaLlibres = $sentenciaSQL->fetchAll(PDO::FETCH_ASSOC);
             <form method="post" enctype="multipart/form-data">
 
                 <div class = "form-group">
-                    <input type="hidden" class="form-control" name="txtID" id="txtID" value="<?php echo $txtID; ?>" placeholder="ID">
+                    <label>ID: </label>
+                    <input type="text" required readonly class="form-control" name="txtID" id="txtID" value="<?php echo $txtID; ?>" placeholder="ID">
                 </div>
 
                 <div class = "form-group">
                     <label for="txtNom"> Nom llibre:</label>
-                    <input type="text" class="form-control" name="txtNom" id="txtNom"  value="<?php echo $txtNom; ?>" placeholder="Nom del llibre">
+                    <input type="text" required class="form-control" name="txtNom" id="txtNom"  value="<?php echo $txtNom; ?>" placeholder="Nom del llibre">
                 </div>
 
                 <div class = "form-group">
@@ -91,9 +141,9 @@ $llistaLlibres = $sentenciaSQL->fetchAll(PDO::FETCH_ASSOC);
 
 
                 <div class="btn-group" role="group" aria-label="">
-                    <button type="submit" name="accion" value="afegir" class="btn btn-success">Afegir</button>
-                    <button type="submit" name="accion" value="modificar" class="btn btn-warning">Editar</button>
-                    <button type="submit" name="accion" value="cancelar" class="btn btn-info">Cancelar</button>
+                    <button type="submit" name="accion" value="afegir" class="btn btn-success" <?php echo ($accion=="Seleccionar")?"disabled":"";?> >Afegir</button>
+                    <button type="submit" name="accion" value="modificar" class="btn btn-warning" <?php echo ($accion!="Seleccionar")?"disabled":"";?>>Editar</button>
+                    <button type="submit" name="accion" value="cancelar" class="btn btn-info" <?php echo ($accion!="Seleccionar")?"disabled":"";?>>Cancelar</button>
                 </div>
 
             </form>
@@ -116,9 +166,12 @@ $llistaLlibres = $sentenciaSQL->fetchAll(PDO::FETCH_ASSOC);
         <tbody>
             <?php foreach($llistaLlibres as $llibre){ ?>
                 <tr>
-                    <td> <?php echo $llibre['id']; ?></td>
+                    <td><?php echo $llibre['id']; ?></td>
                     <td><?php echo $llibre['nom']; ?></td>
-                    <td><?php echo $llibre['imatge']; ?></td>
+                    <td>
+                        <img src="../../img/<?php echo $llibre['imatge']; ?>" width="50px" alt="" srcset="">
+                      
+                    </td>
 
                     <td>            
                         <form method="post"> 
